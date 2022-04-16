@@ -2,13 +2,13 @@
 
 public interface IRepository<T> where T : class
 {
-    public Task<T?> GetById(int id, out T entity);
+    public Task<T?> GetById(int id);
 
     public Task Create(T entity);
 
     public Task Update(T entity);
 
-    public Task Delete(int id);
+    public Task Delete(T entity);
 
-    public Task<List<T>> GetRange(int startId, int count);
+    public Task<IEnumerable<T>> GetRange(int startId, int count);
 }
