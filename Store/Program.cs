@@ -21,8 +21,9 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 // Mapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
-builder.Services.AddDbContext<UserContext>(options => options.UseSqlServer("Data Source=DESKTOP-GJHC42N;Initial Catalog=SimpleStore;Integrated Security=True"));
+builder.Services.AddDbContext<UserContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("UsersData")));
 builder.Services.AddScoped<IRepository<User>, UserRepository>();
+builder.Services.AddScoped<IRepository<Role>, RoleRepository>();
 builder.Services.AddScoped<IService<User>, UserService>();
 
 var app = builder.Build();
@@ -39,9 +40,9 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthorization();
-
 app.UseAuthentication();
+
+app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",

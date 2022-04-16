@@ -1,6 +1,8 @@
 ﻿@using Store.BLL.Entities
-@model IEnumerable<User>
+@using System.Linq;
+@model IEnumerable<UserViewModel>
 
 @foreach (var user in Model){
     <p>@user.Login</p>
+    <p>@user.Password</p>
 }

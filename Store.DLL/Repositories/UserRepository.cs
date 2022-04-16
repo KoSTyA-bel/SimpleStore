@@ -16,9 +16,6 @@ public class UserRepository : IRepository<User>
 
     public Task Create(User entity)
     {
-        var userRole = _context.Roles.First();
-        entity.Role = userRole;
-        entity.RoleId = userRole.Id;
         _context.Users.Add(entity);
         return _context.SaveChangesAsync();
     }

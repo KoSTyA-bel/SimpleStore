@@ -6,6 +6,7 @@ using AutoMapper;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Store.BLL;
 
 namespace Store.Controllers;
 
@@ -40,6 +41,12 @@ public class AccountController : Controller
         if (!_service.TryGetByName(user.Login, out User? u))
         {
             ModelState.AddModelError("", "Данного пользователя не существует.");
+            return View(model);
+        }
+
+        if (!Enumerable.SequenceEqual(u.Password, model.Password.GetMD5Hash()))
+        {
+            ModelState.AddModelError("", "Проверьте введённый пароль.");
             return View(model);
         }
 
@@ -78,10 +85,26 @@ public class AccountController : Controller
 
     protected async Task Authenticate(User user)
     {
+        //var identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme, ClaimTypes.Name, ClaimTypes.Role);
+
+        //identity.AddClaim(new Claim(ClaimTypes.Name, user.Login));
+        //identity.AddClaim(new Claim(ClaimTypes.Role, user.Role.Name));
+
+        //var principal = new ClaimsPrincipal(identity);
+
+        //var authProperties = new AuthenticationProperties
+        //{
+        //    AllowRefresh = true,
+        //    ExpiresUtc = DateTimeOffset.Now.AddDays(1),
+        //    IsPersistent = true,
+        //};
+
+        //await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(principal), authProperties);
+
         var claims = new List<Claim>
             {
                 new Claim(ClaimsIdentity.DefaultNameClaimType, user.Login),
-                new Claim(ClaimsIdentity.DefaultRoleClaimType, user.Role?.Name),
+                new Claim(ClaimsIdentity.DefaultRoleClaimType, user.Role.Name),
             };
 
         var id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
