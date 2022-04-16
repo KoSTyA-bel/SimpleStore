@@ -1,0 +1,6 @@
+﻿@using Store.BLL.Entities
+@model IEnumerable<User>
+
+@foreach (var user in Model){
+    <p>@user.Login</p>
+}

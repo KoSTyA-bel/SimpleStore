@@ -40,4 +40,11 @@ public class UserService : IService<User>
         await _repository.Update(entity);
         return entity;
     }
+
+    public bool TryGetByName(string name, out User? entity)
+    {
+        entity = _repository.GetByName(name).GetAwaiter().GetResult();
+        entity.Role = _repository
+        return entity is not null;
+    }
 }

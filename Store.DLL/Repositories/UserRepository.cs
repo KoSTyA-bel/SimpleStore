@@ -14,11 +14,24 @@ public class UserRepository : IRepository<User>
         _context = context ?? throw new ArgumentNullException(nameof(context));
     }
 
-    public Task Create(User entity) => Task.Run(() => _context.Users.Add(entity));
+    public Task Create(User entity)
+    {
+        var userRole = _context.Roles.First();
+        entity.Role = userRole;
+        entity.RoleId = userRole.Id;
+        _context.Users.Add(entity);
+        return _context.SaveChangesAsync();
+    }
 
-    public Task Delete(User entity) => Task.Run(() => _context.Remove<User>(entity));
+    public Task Delete(User entity)
+    {
+        _context.Remove(entity);
+        return _context.SaveChangesAsync();
+    }
 
     public Task<User?> GetById(int id) => _context.Users.Where(user => user.Id == id).FirstOrDefaultAsync();
+
+    public Task<User?> GetByName(string name) => _context.Users.Where(user => user.Login.Equals(name)).FirstOrDefaultAsync();
 
     public Task<IEnumerable<User>> GetRange(int startId, int count) => Task<IEnumerable<User>>.Factory.StartNew(() =>
     {
@@ -27,10 +40,10 @@ public class UserRepository : IRepository<User>
             return new List<User>();
         }
 
-        return _context.Users.TakeWhile(user => user.Id >= startId && user.Id < startId + count);
+        return _context.Users.Where(user => user.Id >= startId && user.Id < startId + count);
     });
 
-    public Task Update(User entity) => Task.Run(() =>
+    public Task Update(User entity)
     {
         if (_context.Entry(entity).State == EntityState.Detached)
         {
@@ -38,5 +51,7 @@ public class UserRepository : IRepository<User>
         }
 
         _context.Entry(entity).State = EntityState.Modified;
-    });
+
+        return _context.SaveChangesAsync();
+    }
 }

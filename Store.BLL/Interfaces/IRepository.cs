@@ -4,6 +4,8 @@ public interface IRepository<T> where T : class
 {
     public Task<T?> GetById(int id);
 
+    public Task<T?> GetByName(string name);
+
     public Task Create(T entity);
 
     public Task Update(T entity);

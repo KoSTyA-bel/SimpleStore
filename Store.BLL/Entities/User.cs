@@ -14,7 +14,7 @@ public class User
 
     public byte[] Password { get; set; }
 
-    public int? RoleId { get; set; }
+    public int RoleId { get; set; }
 
-    public Role? Role { get; set; }
+    public Role Role { get; set; }
 }
