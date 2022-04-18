@@ -1,18 +1,19 @@
-﻿namespace Store.BLL.Entities;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
-public class Product
+namespace Store.DLL.Entities;
+
+public class ProductMongo
 {
-    public Product()
+    public ProductMongo()
     {
-        Id = string.Empty;
         Name = string.Empty;
         Description = string.Empty;
-        Created = DateTime.UtcNow;
-        StartOfSales = DateTime.UtcNow;
     }
 
-    public string Id { get; set; }
-
+    [BsonId]
+    public ObjectId Id { get; set; }
+    
     public string Name { get; set; }
 
     public string Description { get; set; }

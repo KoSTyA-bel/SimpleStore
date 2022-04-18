@@ -85,6 +85,7 @@ public class AccountController : Controller
 
     protected async Task Authenticate(User user)
     {
+        //Another variation.
         //var identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme, ClaimTypes.Name, ClaimTypes.Role);
 
         //identity.AddClaim(new Claim(ClaimTypes.Name, user.Login));
