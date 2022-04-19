@@ -1,0 +1,23 @@
+﻿@model IEnumerable<ProductViewModel>
+
+<table>
+    <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Count</th>
+            <th>Created</th>
+            <th>StartOfSales</th>
+        </tr>
+    @foreach (var element in Model)
+    {
+        <tr>
+            <td>@element.Id</td>
+            <td>@element.Name</td>
+            <td>@element.Description</td>
+            <td>@element.Count</td>
+            <td>@element.Created</td>
+            <td>@element.StartOfSales</td>
+        </tr>
+    }
+</table>

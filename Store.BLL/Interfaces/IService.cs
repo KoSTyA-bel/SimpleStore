@@ -6,7 +6,7 @@ public interface IService<T> where T : class
 
     public bool TryGetByName(string name, out T? entity);
 
-    public Task<T> Create(T entity);
+    public Task<T?> Create(T entity);
 
     public Task<T> Update(T entity);
 

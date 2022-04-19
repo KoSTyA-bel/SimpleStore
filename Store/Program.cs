@@ -32,6 +32,7 @@ builder.Services.AddScoped<IRepository<User>, UserRepository>();
 builder.Services.AddScoped<IRepository<Role>, RoleRepository>();
 builder.Services.AddScoped<IRepository<Product>, ProductRepository>();
 builder.Services.AddScoped<IService<User>, UserService>();
+builder.Services.AddScoped<IService<Product>, ProductService>();
 
 var app = builder.Build();
 

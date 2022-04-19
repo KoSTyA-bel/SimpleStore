@@ -23,6 +23,7 @@ public class ProductRepository : IRepository<Product>
     public Task Create(Product entity)
     {
         var product = _mapper.Map<ProductMongo>(entity);
+        product.Id = default;
         return _collection.InsertOneAsync(product);
     }
 
@@ -46,9 +47,11 @@ public class ProductRepository : IRepository<Product>
         return null;
     }
 
-    public Task<IEnumerable<Product>> GetRange(int startId, int count)
+    public async Task<IEnumerable<Product>> GetRange(int startId, int count)
     {
-        throw new NotImplementedException();
+        var entitites = await _collection.FindAsync(p => true);
+        var products = entitites.ToEnumerable().Skip(startId).Take(count);
+        return _mapper.Map<IEnumerable<Product>>(products);
     }
 
     public Task Update(Product entity)
@@ -58,8 +61,18 @@ public class ProductRepository : IRepository<Product>
 
     protected virtual void InitialazeCollection()
     {
-        var client = new MongoClient($"mongodb://{_settings.Login}:{_settings.Passord}@{_settings.Host}:{_settings.Port}");
-        var db = client.GetDatabase(_settings.DatabaseName);
-        _collection = db.GetCollection<ProductMongo>(_settings.CollectionName);
+        try
+        {
+            var client = new MongoClient($"mongodb://{_settings.Host}:{_settings.Port}");
+            var db = client.GetDatabase(_settings.DatabaseName);
+            _collection = db.GetCollection<ProductMongo>(_settings.CollectionName);
+            
+        }
+        catch (Exception e)
+        {
+            var client = new MongoClient($"mongodb://{_settings.Login}:{_settings.Passord}@{_settings.Host}:{_settings.Port}");
+            var db = client.GetDatabase(_settings.DatabaseName);
+            _collection = db.GetCollection<ProductMongo>(_settings.CollectionName);
+        }
     }
 }
