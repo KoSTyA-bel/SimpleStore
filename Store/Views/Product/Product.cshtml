@@ -3,6 +3,7 @@
 <div>
     @if (Model is not null)
     {
+        <input asp-for=Id hidden id="objectId" />
         <p>Идентификатор: @Model.Id</p>
         <p>Название: @Model.Name</p>
         <p>Описание: @Model.Description</p>
@@ -15,3 +16,9 @@
         <p>Данного продукта не существует</p>
     }
 </div>
+
+<script src="~/js/signalr/dist/browser/signalr.js"></script>
+<script src="~/js/sales.js"></script>
+<script type="text/javascript">
+    window.onload => send();
+</script>
