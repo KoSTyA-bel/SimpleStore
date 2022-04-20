@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using MongoDB.Bson;
 using Store.BLL;
 using Store.BLL.Entities;
 using Store.DLL.Entities;

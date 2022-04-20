@@ -2,7 +2,7 @@
 
 public interface IRepository<T> where T : class
 {
-    public Task<T?> GetById(int id);
+    public Task<T?> GetById(object id);
 
     public Task<T?> GetByName(string name);
 

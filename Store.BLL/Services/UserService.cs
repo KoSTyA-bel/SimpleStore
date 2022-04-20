@@ -44,14 +44,14 @@ public class UserService : IService<User>
         return entity is null;
     }
 
-    public bool TryGetById(int id, out User? entity)
+    public bool TryGetById(object id, out User? entity)
     {
         entity = _userRepository.GetById(id).GetAwaiter().GetResult();
         bool result;
 
         if (result = entity is not null)
         {
-            var role = _roleRepository.GetById(entity.Id).GetAwaiter().GetResult();
+            var role = _roleRepository.GetById(entity.RoleId).GetAwaiter().GetResult();
             entity.Role = role ?? throw new ArgumentNullException(nameof(role), "Can`t find user role in DB.");
         }
 

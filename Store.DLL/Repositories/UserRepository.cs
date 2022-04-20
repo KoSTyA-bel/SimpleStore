@@ -26,7 +26,18 @@ public class UserRepository : IRepository<User>
         return _context.SaveChangesAsync();
     }
 
-    public Task<User?> GetById(int id) => _context.Users.Where(user => user.Id == id).FirstOrDefaultAsync();
+    public Task<User?> GetById(object entityId)
+    {
+        try
+        {
+            var id = (int)entityId;
+            return _context.Users.Where(user => user.Id == id).FirstOrDefaultAsync();
+        }
+        catch (InvalidCastException e)
+        {
+            return Task<User?>.Factory.StartNew(() => null);
+        }        
+    }
 
     public Task<User?> GetByName(string name) => _context.Users.Where(user => user.Login.Equals(name)).FirstOrDefaultAsync();
 

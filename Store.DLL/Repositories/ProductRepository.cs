@@ -4,6 +4,7 @@ using Store.DLL.Settings;
 using AutoMapper;
 using MongoDB.Driver;
 using Store.DLL.Entities;
+using MongoDB.Bson;
 
 namespace Store.DLL.Repositories;
 
@@ -29,9 +30,19 @@ public class ProductRepository : IRepository<Product>
 
     public Task Delete(Product entity) => _collection.DeleteOneAsync(x => x.Id.ToString().Equals(entity.Id));
 
-    public Task<Product?> GetById(int id)
+    public async Task<Product?> GetById(object entityId)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var id = (ObjectId)entityId;
+            var entities = await _collection.FindAsync(product => product.Id == id);
+            var entity = await entities.FirstAsync();
+            return _mapper.Map<Product>(entity);
+        }
+        catch (InvalidCastException e)
+        {
+            return null;
+        }
     }
 
     public async Task<Product?> GetByName(string name)

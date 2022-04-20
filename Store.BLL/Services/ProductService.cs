@@ -25,9 +25,11 @@ public class ProductService : IService<Product>
 
     public Task<IEnumerable<Product>> GetRange(int startId, int count) => _repository.GetRange(startId, count);
 
-    public bool TryGetById(int id, out Product? entity)
+    public bool TryGetById(object id, out Product? entity)
     {
-        throw new NotImplementedException();
+        entity = _repository.GetById(id).GetAwaiter().GetResult();
+
+        return entity is not null;
     }
 
     public bool TryGetByName(string name, out Product? entity)

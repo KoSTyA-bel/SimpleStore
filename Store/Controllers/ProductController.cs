@@ -4,6 +4,7 @@ using Store.BLL.Interfaces;
 using Store.BLL.Entities;
 using AutoMapper;
 using Store.Models;
+using MongoDB.Bson;
 
 namespace Store.Controllers;
 
@@ -23,6 +24,19 @@ public class ProductController : Controller
     {
         var products = await _service.GetRange(0, int.MaxValue);
         return View(_mapper.Map<IEnumerable<ProductViewModel>>(products));
+    }
+
+    [Route("{controller}/{id}")]
+    public async Task<IActionResult> Product(string id)
+    {
+        var entityId = string.IsNullOrEmpty(id) ? MongoDB.Bson.ObjectId.Empty : MongoDB.Bson.ObjectId.Parse(id);
+
+        if (!_service.TryGetById(entityId, out Product? product))
+        {
+            return View(null);
+        }
+
+        return View(_mapper.Map<ProductViewModel>(product));
     }
 
     [HttpGet]

@@ -1,0 +1,17 @@
+﻿@model ProductViewModel
+
+<div>
+    @if (Model is not null)
+    {
+        <p>@Model.Id</p>
+        <p>@Model.Name</p>
+        <p>@Model.Description</p>
+        <p>@Model.Count</p>
+        <p>@Model.Created</p>
+        <p>@Model.StartOfSales</p>
+    }
+    else
+    {
+        <p>Данного продукта не существует</p>
+    }
+</div>

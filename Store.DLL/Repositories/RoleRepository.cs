@@ -26,7 +26,18 @@ public class RoleRepository : IRepository<Role>
         return _context.SaveChangesAsync();
     }
 
-    public Task<Role?> GetById(int id) => _context.Roles.Where(role => role.Id == id).FirstOrDefaultAsync();
+    public Task<Role?> GetById(object entityId)
+    {
+        try
+        {
+            var id = (int)entityId;
+            return _context.Roles.Where(role => role.Id == id).FirstOrDefaultAsync();
+        }
+        catch (InvalidCastException e)
+        {
+            return Task<Role?>.Factory.StartNew(() => null);
+        }
+    }
 
     public Task<Role?> GetByName(string name) => _context.Roles.Where(role => role.Name.Equals(name)).FirstOrDefaultAsync();
 

@@ -2,7 +2,7 @@
 
 public interface IService<T> where T : class
 {
-    public bool TryGetById(int id, out T? entity);
+    public bool TryGetById(object entityId, out T? entity);
 
     public bool TryGetByName(string name, out T? entity);
 
