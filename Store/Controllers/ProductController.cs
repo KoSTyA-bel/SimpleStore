@@ -1,10 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Store.BLL.Interfaces;
 using Store.BLL.Entities;
-using AutoMapper;
+using Store.BLL.Interfaces;
 using Store.Models;
-using MongoDB.Bson;
 
 namespace Store.Controllers;
 
@@ -29,7 +28,10 @@ public class ProductController : Controller
     [Route("{controller}/{id}")]
     public async Task<IActionResult> Product(string id)
     {
-        var entityId = string.IsNullOrEmpty(id) ? MongoDB.Bson.ObjectId.Empty : MongoDB.Bson.ObjectId.Parse(id);
+        if (!MongoDB.Bson.ObjectId.TryParse(id, out MongoDB.Bson.ObjectId entityId))
+        {
+            entityId = MongoDB.Bson.ObjectId.Empty;
+        }
 
         if (!_service.TryGetById(entityId, out Product? product))
         {
@@ -57,7 +59,7 @@ public class ProductController : Controller
         }
 
         var product = _mapper.Map<Product>(model);
-        
+
         if (product is null)
         {
             return View(model);

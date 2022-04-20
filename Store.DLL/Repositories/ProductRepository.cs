@@ -36,7 +36,7 @@ public class ProductRepository : IRepository<Product>
         {
             var id = (ObjectId)entityId;
             var entities = await _collection.FindAsync(product => product.Id == id);
-            var entity = await entities.FirstAsync();
+            var entity = await entities.FirstOrDefaultAsync();
             return _mapper.Map<Product>(entity);
         }
         catch (InvalidCastException e)

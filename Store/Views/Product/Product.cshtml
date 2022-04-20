@@ -3,12 +3,12 @@
 <div>
     @if (Model is not null)
     {
-        <p>@Model.Id</p>
-        <p>@Model.Name</p>
-        <p>@Model.Description</p>
-        <p>@Model.Count</p>
-        <p>@Model.Created</p>
-        <p>@Model.StartOfSales</p>
+        <p>Идентификатор: @Model.Id</p>
+        <p>Название: @Model.Name</p>
+        <p>Описание: @Model.Description</p>
+        <p>Количество: @Model.Count</p>
+        <p>Дата создания: @Model.Created</p>
+        <p>Дата старта продаж: @Model.StartOfSales</p>
     }
     else
     {
