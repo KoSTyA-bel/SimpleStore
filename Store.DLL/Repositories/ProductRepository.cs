@@ -67,7 +67,8 @@ public class ProductRepository : IRepository<Product>
 
     public Task Update(Product entity)
     {
-        throw new NotImplementedException();
+        var product = _mapper.Map<ProductMongo>(entity);
+        return _collection.ReplaceOneAsync(x => x.Id == product.Id, product);
     }
 
     protected virtual void InitialazeCollection()

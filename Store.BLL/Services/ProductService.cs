@@ -40,6 +40,7 @@ public class ProductService : IService<Product>
 
     public Task<Product> Update(Product entity)
     {
-        throw new NotImplementedException();
+        _repository.Update(entity).GetAwaiter().GetResult();
+        return _repository.GetById(entity.Id);
     }
 }

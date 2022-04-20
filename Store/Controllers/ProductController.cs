@@ -7,7 +7,6 @@ using Store.Models;
 
 namespace Store.Controllers;
 
-
 public class ProductController : Controller
 {
     private readonly IService<Product> _service;
@@ -66,6 +65,38 @@ public class ProductController : Controller
         }
 
         await _service.Create(product);
+
+        return RedirectToAction("Index");
+    }
+
+    [HttpGet]
+    [Authorize(Roles = "admin")]
+    public async Task<IActionResult> Update(string id)
+    {
+        if (!MongoDB.Bson.ObjectId.TryParse(id, out MongoDB.Bson.ObjectId entityId))
+        {
+            entityId = MongoDB.Bson.ObjectId.Empty;
+        }
+
+        if (!_service.TryGetById(entityId, out Product? product))
+        {
+            return View(null);
+        }
+
+        return View(_mapper.Map<ProductViewModel>(product));
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "admin")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Update(ProductViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        await _service.Update(_mapper.Map<Product>(model));
 
         return RedirectToAction("Index");
     }
