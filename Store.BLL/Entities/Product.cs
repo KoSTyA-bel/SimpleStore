@@ -9,6 +9,7 @@ public class Product
         Description = string.Empty;
         Created = DateTime.UtcNow;
         StartOfSales = DateTime.UtcNow;
+        IsSalesStart = false;
     }
 
     public string Id { get; set; }
@@ -22,4 +23,6 @@ public class Product
     public DateTime Created { get; init; }
 
     public DateTime StartOfSales { get; set; }
+
+    public bool IsSalesStart { get; set; }
 }

@@ -10,6 +10,7 @@
         <p>Количество: @Model.Count</p>
         <p>Дата создания: @Model.Created</p>
         <p>Дата старта продаж: @Model.StartOfSales</p>
+        <div id="fromHub"></div>
     }
     else
     {
@@ -19,6 +20,3 @@
 
 <script src="~/js/signalr/dist/browser/signalr.js"></script>
 <script src="~/js/sales.js"></script>
-<script type="text/javascript">
-    window.onload => send();
-</script>

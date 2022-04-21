@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Store.DLL.Settings;
 using Microsoft.Extensions.Options;
 using Store.Hubs;
+using Store.DLL.Listeners;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +37,7 @@ builder.Services.AddScoped<IRepository<Role>, RoleRepository>();
 builder.Services.AddScoped<IRepository<Product>, ProductRepository>();
 builder.Services.AddScoped<IService<User>, UserService>();
 builder.Services.AddScoped<IService<Product>, ProductService>();
+builder.Services.AddSingleton<ProductDatabaseListener>();
 
 var app = builder.Build();
 
@@ -60,5 +62,9 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapHub<SalesHub>("/salesHub");
+
+var listener = app.Services.GetService(typeof(ProductDatabaseListener)) as ProductDatabaseListener;
+
+listener.ListenMongo();
 
 app.Run();

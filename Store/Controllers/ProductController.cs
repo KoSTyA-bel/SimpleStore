@@ -42,6 +42,7 @@ public class ProductController : Controller
 
     [HttpGet]
     [Authorize(Roles = "admin")]
+    [Route("{controller}/Create")]
     public IActionResult Create()
     {
         return View();
@@ -50,6 +51,7 @@ public class ProductController : Controller
     [HttpPost]
     [Authorize(Roles = "admin")]
     [ValidateAntiForgeryToken]
+    [Route("{controller}/Create")]
     public async Task<IActionResult> Create(ProductViewModel model)
     {
         if (!ModelState.IsValid)
