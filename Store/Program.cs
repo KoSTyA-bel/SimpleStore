@@ -16,7 +16,14 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(opt => 
+{
+    opt.EnableDetailedErrors = true;
+    opt.ClientTimeoutInterval = TimeSpan.MaxValue;
+    opt.HandshakeTimeout = TimeSpan.MaxValue;
+});
+
+builder.Services.AddHostedService<ProductDatabaseListener>();
 
 builder.Services.Configure<ProductDatabaseSettings>(builder.Configuration.GetSection(nameof(ProductDatabaseSettings)));
 
@@ -34,10 +41,9 @@ builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddDbContext<UserContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("UsersData")));
 builder.Services.AddScoped<IRepository<User>, UserRepository>();
 builder.Services.AddScoped<IRepository<Role>, RoleRepository>();
-builder.Services.AddScoped<IRepository<Product>, ProductRepository>();
+builder.Services.AddSingleton<IRepository<Product>, ProductRepository>();
 builder.Services.AddScoped<IService<User>, UserService>();
 builder.Services.AddScoped<IService<Product>, ProductService>();
-builder.Services.AddSingleton<ProductDatabaseListener>();
 
 var app = builder.Build();
 
@@ -62,9 +68,5 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapHub<SalesHub>("/salesHub");
-
-var listener = app.Services.GetService(typeof(ProductDatabaseListener)) as ProductDatabaseListener;
-
-listener.ListenMongo();
 
 app.Run();

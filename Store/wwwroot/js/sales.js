@@ -8,6 +8,16 @@ connection.on("ReceiveMessage", function (id) {
     li.textContent = id;
 });
 
+connection.on("startSales", function (product) {
+    var productId = document.getElementById("objectId").getAttribute("value");
+    if (productId == product.id) {
+        var button = document.getElementById("buy")
+        button.hidden = false
+    }
+});
+
+connection.logging = true;
+
 connection.start().then(function () {
     var productId = document.getElementById("objectId").getAttribute("value");
     connection.invoke("ListenProduct", productId).catch(function (err) {

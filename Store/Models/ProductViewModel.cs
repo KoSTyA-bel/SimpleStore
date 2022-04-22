@@ -22,4 +22,6 @@ public class ProductViewModel
     public DateTime Created { get; init; }
 
     public DateTime StartOfSales { get; set; }
+
+    public bool IsSalesStart { get; set; }
 }

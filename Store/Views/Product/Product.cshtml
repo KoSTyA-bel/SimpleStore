@@ -11,6 +11,7 @@
         <p>Дата создания: @Model.Created</p>
         <p>Дата старта продаж: @Model.StartOfSales</p>
         <div id="fromHub"></div>
+        <input id="buy" type="button" value="Купить" hidden="@(!Model.IsSalesStart)" />
     }
     else
     {
