@@ -19,38 +19,19 @@ public class ProductDatabaseListener : BackgroundService
         _hub = hub ?? throw new ArgumentNullException(nameof(hub));
     }
 
-    public async Task BuyProduct(string productId)
+    public async Task BuyProduct(string user, string productId)
     {
-        throw new NotImplementedException();
-    }
-
-    // Need better performance...
-    public async Task ListenMongo()
-    {
-        while (true)
+        lock (_locker)
         {
-            var products = await _repository.GetRange(0, int.MaxValue);
-            var date = DateTime.Now;
-            List<Task> tasks = new List<Task>();
+            var product = _repository.GetById(productId).GetAwaiter().GetResult();
 
-            foreach (var product in products)
+            if (product.Count > 0)
             {
-                if (product.IsSalesStart)
-                {
-                    continue;
-                }
-
-                if (product.StartOfSales <= date)
-                {
-                    product.IsSalesStart = true;
-                    await _hub.Clients.Group(product.Id).StartSales(product);
-                    tasks.Add(_repository.Update(product));
-                }
+                product.Count--;
             }
 
-            Task.WaitAll(tasks.ToArray());
-
-            await Task.Delay(1000);
+            _repository.Update(product).GetAwaiter().GetResult();
+            _hub.Clients.Group(productId).ProductDataChanged(product);
         }
     }
 
@@ -72,7 +53,7 @@ public class ProductDatabaseListener : BackgroundService
                 if (product.StartOfSales <= date)
                 {
                     product.IsSalesStart = true;
-                    await _hub.Clients.Group(product.Id).StartSales(product);
+                    await _hub.Clients.Group(product.Id).StartSales(product.Id);
                     tasks.Add(_repository.Update(product));
                 }
             }

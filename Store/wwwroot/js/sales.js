@@ -2,17 +2,22 @@
 
 var connection = new signalR.HubConnectionBuilder().withUrl("/salesHub").build();
 
-connection.on("ReceiveMessage", function (id) {
-    var li = document.createElement("li")
-    document.getElementById("fromHub").appendChild(li)
-    li.textContent = id;
-});
-
-connection.on("startSales", function (product) {
+connection.on("startSales", function (id) {
     var productId = document.getElementById("objectId").getAttribute("value");
-    if (productId == product.id) {
+    if (productId == id) {
         var button = document.getElementById("buy")
         button.hidden = false
+    }
+});
+
+connection.on("productDataChanged", function (product) {
+    var productId = document.getElementById("objectId").getAttribute("value");
+    if (productId == product.id) {
+        document.getElementById("count").innerHTML = 'Количество: ' + product.count.toString();
+
+        if (product.count <= 0) {
+            document.getElementById("buy").hidden = true;
+        }
     }
 });
 
@@ -27,3 +32,11 @@ connection.start().then(function () {
 }).catch(function (err) {
     return console.error(err.toString());
 });
+
+document.getElementById('buy').addEventListener('click', function (e) {
+    var productId = document.getElementById("objectId").getAttribute("value");
+    connection.invoke("BuyProduct", productId).catch(function (err) {
+        return console.error(err.toString())
+    });
+    event.preventDefault();
+})

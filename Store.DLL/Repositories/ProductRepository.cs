@@ -32,17 +32,10 @@ public class ProductRepository : IRepository<Product>
 
     public async Task<Product?> GetById(object entityId)
     {
-        try
-        {
-            var id = (ObjectId)entityId;
-            var entities = await _collection.FindAsync(product => product.Id == id);
-            var entity = await entities.FirstOrDefaultAsync();
-            return _mapper.Map<Product>(entity);
-        }
-        catch (InvalidCastException e)
-        {
-            return null;
-        }
+        var id = GetId(entityId);
+        var entities = await _collection.FindAsync(product => product.Id == id);
+        var entity = await entities.FirstOrDefaultAsync();
+        return _mapper.Map<Product>(entity);
     }
 
     public async Task<Product?> GetByName(string name)
@@ -70,6 +63,14 @@ public class ProductRepository : IRepository<Product>
         var product = _mapper.Map<ProductMongo>(entity);
         return _collection.ReplaceOneAsync(x => x.Id == product.Id, product);
     }
+
+    protected ObjectId GetId(object obj) =>
+        obj switch
+        {
+            ObjectId => (ObjectId)obj,
+            string => ObjectId.Parse(obj as string),
+            _ => ObjectId.Empty,
+        };
 
     protected virtual void InitialazeCollection()
     {

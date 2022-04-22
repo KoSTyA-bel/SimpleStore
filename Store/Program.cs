@@ -44,6 +44,7 @@ builder.Services.AddScoped<IRepository<Role>, RoleRepository>();
 builder.Services.AddSingleton<IRepository<Product>, ProductRepository>();
 builder.Services.AddScoped<IService<User>, UserService>();
 builder.Services.AddScoped<IService<Product>, ProductService>();
+builder.Services.AddScoped<ProductDatabaseListener>();
 
 var app = builder.Build();
 
