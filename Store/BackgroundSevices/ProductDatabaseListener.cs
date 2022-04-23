@@ -1,37 +1,46 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MongoDB.Driver;
 using Store.BLL.Entities;
 using Store.BLL.Interfaces;
+using Store.DLL.Entities;
+using Store.DLL.Settings;
 using Store.Hubs;
 
 namespace Store.DLL.Listeners;
 
 public class ProductDatabaseListener : BackgroundService
 {
-    private readonly IRepository<Product> _repository;
     private readonly object _locker = new object();
     private readonly IHubContext<SalesHub, ISales> _hub;
 
-    public ProductDatabaseListener(IRepository<Product> repository, IHubContext<SalesHub, ISales> hub)
+    private readonly ProductDatabaseSettings _settings;
+    private readonly IMapper _mapper;
+    private IMongoCollection<ProductMongo> _collection = null!;
+
+    public ProductDatabaseListener(ProductDatabaseSettings settings, IHubContext<SalesHub, ISales> hub, IMapper mapper)
     {
-        _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        _settings = settings ?? throw new ArgumentNullException(nameof(settings));
         _hub = hub ?? throw new ArgumentNullException(nameof(hub));
+        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+        InitialazeCollection();
     }
 
     public async Task BuyProduct(string user, string productId)
     {
         lock (_locker)
         {
-            var product = _repository.GetById(productId).GetAwaiter().GetResult();
+            var product = _collection.Find(x => x.Id == MongoDB.Bson.ObjectId.Parse(productId)).First();
 
             if (product.Count > 0)
             {
                 product.Count--;
             }
 
-            _repository.Update(product).GetAwaiter().GetResult();
-            _hub.Clients.Group(productId).ProductDataChanged(product);
+            _collection.ReplaceOneAsync(x => x.Id == product.Id, product);
+            _hub.Clients.Group(productId).ProductDataChanged(_mapper.Map<Product>(product));
         }
     }
 
@@ -39,7 +48,7 @@ public class ProductDatabaseListener : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            var products = await _repository.GetRange(0, int.MaxValue);
+            var products = (await _collection.FindAsync(product => !product.IsSalesStart)).ToEnumerable();
             var date = DateTime.Now;
             List<Task> tasks = new List<Task>();
 
@@ -53,14 +62,31 @@ public class ProductDatabaseListener : BackgroundService
                 if (product.StartOfSales <= date)
                 {
                     product.IsSalesStart = true;
-                    await _hub.Clients.Group(product.Id).StartSales(product.Id);
-                    tasks.Add(_repository.Update(product));
+                    await _hub.Clients.Group(product.Id.ToString()).StartSales(product.Id.ToString());
+                    tasks.Add(_collection.ReplaceOneAsync(x => x.Id == product.Id, product));
                 }
             }
 
             Task.WaitAll(tasks.ToArray());
 
             await Task.Delay(1000);
+        }
+    }
+
+    protected virtual void InitialazeCollection()
+    {
+        try
+        {
+            var client = new MongoClient($"mongodb://{_settings.Host}:{_settings.Port}");
+            var db = client.GetDatabase(_settings.DatabaseName);
+            _collection = db.GetCollection<ProductMongo>(_settings.CollectionName);
+
+        }
+        catch (Exception e)
+        {
+            var client = new MongoClient($"mongodb://{_settings.Login}:{_settings.Passord}@{_settings.Host}:{_settings.Port}");
+            var db = client.GetDatabase(_settings.DatabaseName);
+            _collection = db.GetCollection<ProductMongo>(_settings.CollectionName);
         }
     }
 }
