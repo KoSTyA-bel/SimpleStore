@@ -1,14 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using Store.BLL.Entities;
+using Store.BLL.Interfaces;
 using Store.DLL.Listeners;
-using System.Security.Claims;
 
 namespace Store.Hubs;
 
 public class SalesHub : Hub<ISales>
 {
-    private readonly ProductDatabaseListener _listener;
+    private readonly IProductDatabaseListener _listener;
 
     public SalesHub(ProductDatabaseListener listener)
     {

@@ -1,7 +1,5 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using MongoDB.Driver;
 using Store.BLL.Entities;
 using Store.BLL.Interfaces;
@@ -11,11 +9,10 @@ using Store.Hubs;
 
 namespace Store.DLL.Listeners;
 
-public class ProductDatabaseListener : BackgroundService
+public class ProductDatabaseListener : BackgroundService, IProductDatabaseListener
 {
     private readonly object _locker = new object();
     private readonly IHubContext<SalesHub, ISales> _hub;
-
     private readonly ProductDatabaseSettings _settings;
     private readonly IMapper _mapper;
     private IMongoCollection<ProductMongo> _collection = null!;
@@ -68,6 +65,8 @@ public class ProductDatabaseListener : BackgroundService
             }
 
             Task.WaitAll(tasks.ToArray());
+
+            products = null;
 
             await Task.Delay(1000);
         }
