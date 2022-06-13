@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Store.BLL\Store.BLL.csproj" />
+    <ProjectReference Include="..\Store.DataTransferLevel\Store.DataTransferLevel.csproj" />
     <ProjectReference Include="..\Store.DLL\Store.DLL.csproj" />
   </ItemGroup>
 
