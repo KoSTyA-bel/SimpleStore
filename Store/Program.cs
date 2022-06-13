@@ -10,6 +10,7 @@ using Store.DLL.Settings;
 using Microsoft.Extensions.Options;
 using Store.Hubs;
 using Store.DLL.Listeners;
+using Store.DataTransferLevel.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +27,7 @@ builder.Services.AddSignalR(opt =>
 builder.Services.AddHostedService<ProductDatabaseListener>();
 
 builder.Services.Configure<ProductDatabaseSettings>(builder.Configuration.GetSection(nameof(ProductDatabaseSettings)));
+builder.Services.Configure<RabbitSettings>(builder.Configuration.GetSection(nameof(RabbitSettings)));
 
 builder.Services.AddSingleton<ProductDatabaseSettings>(sp => sp.GetRequiredService<IOptions<ProductDatabaseSettings>>().Value);
 
