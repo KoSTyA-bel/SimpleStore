@@ -8,12 +8,15 @@ namespace Store.DataTransferLevel;
 
 public class DataListener : IDataListener, IDisposable
 {
-    private bool _isStopped = false;
     private readonly RabbitSettings _settings;
+    private CancellationTokenSource _cancelTokenSource;
+    private CancellationToken _token;
 
     public DataListener(RabbitSettings settings)
     {
         _settings = settings ?? throw new ArgumentNullException(nameof(settings));
+        _cancelTokenSource = new CancellationTokenSource();
+        _token = _cancelTokenSource.Token;
     }
 
     public void StartListen()
@@ -34,7 +37,7 @@ public class DataListener : IDataListener, IDisposable
             channel.BasicQos(0, 1, false);
             var consumer = new EventingBasicConsumer(channel);
             channel.BasicConsume(queue: _settings.RoutingKey,
-              autoAck: false, consumer: consumer);
+                                 autoAck: false, consumer: consumer);
 
             consumer.Received += (model, ea) =>
             {
@@ -65,12 +68,17 @@ public class DataListener : IDataListener, IDisposable
                       multiple: false);
                 }
             };
+
+            while (!_token.IsCancellationRequested)
+            {
+
+            }
         }
     }
 
     public void StopListen()
     {
-        _isStopped = false;
+        _cancelTokenSource.Cancel();
     }
 
     public void Dispose()

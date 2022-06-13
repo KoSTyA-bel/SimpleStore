@@ -20,6 +20,7 @@ public class DataSender : IDataSender, IDisposable
     public DataSender(RabbitSettings settings)
     {
         _settings = settings ?? throw new ArgumentNullException(nameof(settings));
+        Connect();
     }
 
     protected virtual void Connect()

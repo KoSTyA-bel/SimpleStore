@@ -1,23 +1,24 @@
-using Store;
-using Store.DLL.Contexts;
-using Store.DLL.Repositories;
-using Store.BLL.Interfaces;
-using Store.BLL.Entities;
-using Store.BLL.Services;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Store.DLL.Settings;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Store.Hubs;
-using Store.DLL.Listeners;
+using Store;
+using Store.BLL.Entities;
+using Store.BLL.Interfaces;
+using Store.BLL.Services;
+using Store.DataTransferLevel;
 using Store.DataTransferLevel.Settings;
+using Store.DLL.Contexts;
+using Store.DLL.Listeners;
+using Store.DLL.Repositories;
+using Store.DLL.Settings;
+using Store.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddSignalR(opt => 
+builder.Services.AddSignalR(opt =>
 {
     opt.EnableDetailedErrors = true;
     opt.ClientTimeoutInterval = TimeSpan.MaxValue;
@@ -30,6 +31,7 @@ builder.Services.Configure<ProductDatabaseSettings>(builder.Configuration.GetSec
 builder.Services.Configure<RabbitSettings>(builder.Configuration.GetSection(nameof(RabbitSettings)));
 
 builder.Services.AddSingleton<ProductDatabaseSettings>(sp => sp.GetRequiredService<IOptions<ProductDatabaseSettings>>().Value);
+builder.Services.AddSingleton<RabbitSettings>(sp => sp.GetRequiredService<IOptions<RabbitSettings>>().Value);
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             .AddCookie(options =>
@@ -47,6 +49,14 @@ builder.Services.AddSingleton<IRepository<Product>, ProductRepository>();
 builder.Services.AddScoped<IService<User>, UserService>();
 builder.Services.AddScoped<IService<Product>, ProductService>();
 builder.Services.AddScoped<ProductDatabaseListener>();
+builder.Services.AddSingleton<IDataSender, DataSender>(x =>
+{
+    using (x.CreateScope())
+    {
+        var settings = x.GetService(typeof(RabbitSettings)) as RabbitSettings;
+        return new DataSender(settings);
+    }
+});
 
 var app = builder.Build();
 
@@ -71,5 +81,11 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapHub<SalesHub>("/salesHub");
+
+var settings = app.Services.GetService(typeof(RabbitSettings));
+var settingss = app.Services.GetService(typeof(ProductDatabaseSettings));
+var listener = new DataListener(settings as RabbitSettings);
+
+Task.Run(() => listener.StartListen());
 
 app.Run();
