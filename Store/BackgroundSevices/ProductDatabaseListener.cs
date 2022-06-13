@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 using MongoDB.Driver;
 using Store.BLL.Entities;
 using Store.BLL.Interfaces;
+using Store.DataTransferLevel;
 using Store.DLL.Entities;
 using Store.DLL.Settings;
 using Store.Hubs;
@@ -16,12 +17,14 @@ public class ProductDatabaseListener : BackgroundService, IProductDatabaseListen
     private readonly ProductDatabaseSettings _settings;
     private readonly IMapper _mapper;
     private IMongoCollection<ProductMongo> _collection = null!;
+    private readonly IDataSender _sender;
 
-    public ProductDatabaseListener(ProductDatabaseSettings settings, IHubContext<SalesHub, ISales> hub, IMapper mapper)
+    public ProductDatabaseListener(ProductDatabaseSettings settings, IDataSender sender, IHubContext<SalesHub, ISales> hub, IMapper mapper)
     {
         _settings = settings ?? throw new ArgumentNullException(nameof(settings));
         _hub = hub ?? throw new ArgumentNullException(nameof(hub));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+        _sender = sender ?? throw new ArgumentNullException(nameof(sender));
         InitialazeCollection();
     }
 
@@ -29,15 +32,27 @@ public class ProductDatabaseListener : BackgroundService, IProductDatabaseListen
     {
         lock (_locker)
         {
-            var product = _collection.Find(x => x.Id == MongoDB.Bson.ObjectId.Parse(productId)).First();
-
-            if (product.Count > 0)
+            var response = _sender.Call(productId);
+            
+            switch (response)
             {
-                product.Count--;
+                case TransferStatus.Success:
+                    var product = _collection.Find(x => x.Id == MongoDB.Bson.ObjectId.Parse(productId)).First();
+                    _hub.Clients.Group(productId).ProductDataChanged(_mapper.Map<Product>(product));
+                    break;
+                default:
+                    break;
             }
 
-            _collection.ReplaceOneAsync(x => x.Id == product.Id, product);
-            _hub.Clients.Group(productId).ProductDataChanged(_mapper.Map<Product>(product));
+            //var product = _collection.Find(x => x.Id == MongoDB.Bson.ObjectId.Parse(productId)).First();
+
+            //if (product.Count > 0)
+            //{
+            //    product.Count--;
+            //}
+
+            //_collection.ReplaceOneAsync(x => x.Id == product.Id, product);
+            //_hub.Clients.Group(productId).ProductDataChanged(_mapper.Map<Product>(product));
         }
     }
 
