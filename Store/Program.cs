@@ -82,9 +82,7 @@ app.MapControllerRoute(
 
 app.MapHub<SalesHub>("/salesHub");
 
-var settings = app.Services.GetService(typeof(RabbitSettings));
-var settingss = app.Services.GetService(typeof(ProductDatabaseSettings));
-var listener = new DataListener(settings as RabbitSettings);
+var listener = new DataListener(app.Services);
 
 Task.Run(() => listener.StartListen());
 

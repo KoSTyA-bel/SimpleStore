@@ -1,5 +1,6 @@
 ﻿using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using Store.BLL.Entities;
 using Store.BLL.Interfaces;
 using Store.DataTransferLevel.Settings;
 using System.Text;
@@ -9,17 +10,21 @@ namespace Store.DataTransferLevel;
 public class DataListener : IDataListener, IDisposable
 {
     private readonly RabbitSettings _settings;
+    private readonly IServiceProvider _provider;
     private CancellationTokenSource _cancelTokenSource;
     private CancellationToken _token;
 
-    public DataListener(RabbitSettings settings)
+    public DataListener(IServiceProvider provider)
     {
-        _settings = settings ?? throw new ArgumentNullException(nameof(settings));
+        _provider = provider ?? throw new ArgumentNullException(nameof(provider));
+        _settings = provider.GetService(typeof(RabbitSettings)) as RabbitSettings ?? throw new ArgumentNullException("Can`t find RabbitSettings.");
         _cancelTokenSource = new CancellationTokenSource();
         _token = _cancelTokenSource.Token;
     }
 
-    public void StartListen()
+    public CancellationTokenSource CancellationTokenSource { get => _cancelTokenSource; }
+
+    public async void StartListen()
     {
         var factory = new ConnectionFactory()
         {
@@ -51,9 +56,7 @@ public class DataListener : IDataListener, IDisposable
                 try
                 {
                     var message = Encoding.UTF8.GetString(body);
-                    // TODO
-                    // Implement the purchase of a single item.
-                    response = TransferStatus.Success;
+                    response = BuyProduct(message).GetAwaiter().GetResult();
                 }
                 catch (Exception e)
                 {
@@ -84,5 +87,28 @@ public class DataListener : IDataListener, IDisposable
     public void Dispose()
     {
         StopListen();
+    }
+
+    protected virtual async Task<string> BuyProduct(string id)
+    {
+        var repository = _provider.GetService(typeof(IRepository<Product>)) as IRepository<Product>;
+
+        if (repository is null)
+        {
+            throw new ArgumentNullException(nameof(repository));
+        }
+
+        var product = await repository.GetById(id);
+
+        if (product is null || product.Count <= 0)
+        {
+            return TransferStatus.Failure;
+        }
+
+        product.Count--;
+
+        await repository.Update(product);
+
+        return TransferStatus.Success;
     }
 }
