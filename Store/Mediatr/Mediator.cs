@@ -17,28 +17,11 @@ public class Mediator : IMediator
     public object Send(CommandType commandType, EntityType entityType, object obj) =>
         entityType switch
         {
-            EntityType.User => DoActionWithUserService(commandType, obj),
-            EntityType.Product => DoActionWithProductService(commandType, obj),
+            EntityType.User => DoActionWithService(commandType, obj, this.userService),
+            EntityType.Product => DoActionWithService(commandType, obj, this.productService),
         };
 
-    private object DoActionWithUserService(CommandType commandType, object obj)
-    {
-        switch (commandType)
-        {
-            case CommandType.Create:
-                break;
-            case CommandType.Read:
-                break;
-            case CommandType.Update:
-                break;
-            case CommandType.Delete:
-                break;
-        }
-
-        throw new ArgumentException("The command cannot be executed");
-    }
-
-    private object DoActionWithProductService(CommandType commandType, object obj)
+    private object DoActionWithService<T>(CommandType commandType, object obj, IService<T> service) where T: class
     {
         switch (commandType)
         {
