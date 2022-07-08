@@ -1,4 +1,4 @@
-﻿namespace Store.BLL;
+﻿namespace Store.Mediatr;
 
 [Flags]
 public enum CommandType
