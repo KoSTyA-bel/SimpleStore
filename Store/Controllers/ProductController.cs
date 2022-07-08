@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Store.BLL.Entities;
 using Store.BLL.Interfaces;
+using Store.Mediatr;
 using Store.Models;
 
 namespace Store.Controllers;
@@ -11,11 +12,13 @@ public class ProductController : Controller
 {
     private readonly IService<Product> _service;
     private readonly IMapper _mapper;
+    private readonly IMediator mediator;
 
-    public ProductController(IService<Product> service, IMapper mapper)
+    public ProductController(IService<Product> service, IMapper mapper, IMediator mediator)
     {
         _service = service ?? throw new ArgumentNullException(nameof(service));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+        this.mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
     }
 
     public async Task<IActionResult> Index()
@@ -66,7 +69,9 @@ public class ProductController : Controller
             return View(model);
         }
 
-        await _service.Create(product);
+        this.mediator.Send(CommandType.Create, EntityType.Product, product);
+
+        //await _service.Create(product);
 
         return RedirectToAction("Index");
     }

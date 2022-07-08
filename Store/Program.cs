@@ -12,6 +12,7 @@ using Store.DLL.Listeners;
 using Store.DLL.Repositories;
 using Store.DLL.Settings;
 using Store.Hubs;
+using Store.Mediatr;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +27,8 @@ builder.Services.AddSignalR(opt =>
 });
 
 builder.Services.AddHostedService<ProductDatabaseListener>();
+
+builder.Services.AddScoped<IMediator, Mediator>();
 
 builder.Services.Configure<ProductDatabaseSettings>(builder.Configuration.GetSection(nameof(ProductDatabaseSettings)));
 builder.Services.Configure<RabbitSettings>(builder.Configuration.GetSection(nameof(RabbitSettings)));

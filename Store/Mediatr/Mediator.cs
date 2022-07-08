@@ -26,12 +26,16 @@ public class Mediator : IMediator
         switch (commandType)
         {
             case CommandType.Create:
-                break;
+                return service.Create(obj as T).GetAwaiter().GetResult();
             case CommandType.Read:
-                break;
+                service.TryGetById(obj, out T entity);
+                return entity;
             case CommandType.Update:
-                break;
+                return service.Update(obj as T).GetAwaiter().GetResult();
             case CommandType.Delete:
+                // TODO:
+                // Implement deleting.
+                //return service.Delete(obj);
                 break;
         }
 
