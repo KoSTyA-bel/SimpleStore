@@ -14,8 +14,44 @@ public class Mediator : IMediator
         this.userService = userService ?? throw new ArgumentNullException(nameof(userService));
     }
 
-    public object Send(CommandType commandType, EntityType entityType, object obj)
+    public object Send(CommandType commandType, EntityType entityType, object obj) =>
+        entityType switch
+        {
+            EntityType.User => DoActionWithUserService(commandType, obj),
+            EntityType.Product => DoActionWithProductService(commandType, obj),
+        };
+
+    private object DoActionWithUserService(CommandType commandType, object obj)
     {
-        throw new NotImplementedException();
+        switch (commandType)
+        {
+            case CommandType.Create:
+                break;
+            case CommandType.Read:
+                break;
+            case CommandType.Update:
+                break;
+            case CommandType.Delete:
+                break;
+        }
+
+        throw new ArgumentException("The command cannot be executed");
+    }
+
+    private object DoActionWithProductService(CommandType commandType, object obj)
+    {
+        switch (commandType)
+        {
+            case CommandType.Create:
+                break;
+            case CommandType.Read:
+                break;
+            case CommandType.Update:
+                break;
+            case CommandType.Delete:
+                break;
+        }
+
+        throw new ArgumentException("The command cannot be executed");
     }
 }
