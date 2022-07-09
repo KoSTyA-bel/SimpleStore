@@ -1,3 +1,4 @@
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -13,6 +14,8 @@ using Store.DLL.Repositories;
 using Store.DLL.Settings;
 using Store.Hubs;
 using Store.Mediatr;
+using Store.Models;
+using Store.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,6 +63,7 @@ builder.Services.AddSingleton<IDataSender, DataSender>(x =>
         return new DataSender(settings);
     }
 });
+builder.Services.AddScoped<IValidator<ProductViewModel>, ProductValidator>();
 
 var app = builder.Build();
 

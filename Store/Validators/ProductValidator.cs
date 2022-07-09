@@ -1,9 +1,10 @@
 ﻿using Store.BLL.Entities;
 using FluentValidation;
+using Store.Models;
 
 namespace Store.Validators;
 
-public class ProductValidator : AbstractValidator<Product>
+public class ProductValidator : AbstractValidator<ProductViewModel>
 {
     public ProductValidator()
     {

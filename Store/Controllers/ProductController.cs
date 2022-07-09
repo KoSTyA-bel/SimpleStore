@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Store.BLL.Entities;
@@ -10,21 +11,21 @@ namespace Store.Controllers;
 
 public class ProductController : Controller
 {
-    private readonly IService<Product> _service;
-    private readonly IMapper _mapper;
+    private readonly IValidator<ProductViewModel> validator;
+    private readonly IMapper mapper;
     private readonly IMediator mediator;
 
-    public ProductController(IService<Product> service, IMapper mapper, IMediator mediator)
+    public ProductController(IValidator<ProductViewModel> validator, IMapper mapper, IMediator mediator)
     {
-        _service = service ?? throw new ArgumentNullException(nameof(service));
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+        this.validator = validator ?? throw new ArgumentNullException(nameof(validator));
+        this.mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         this.mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
     }
 
     public async Task<IActionResult> Index()
     {
-        var products = await _service.GetRange(0, int.MaxValue);
-        return View(_mapper.Map<IEnumerable<ProductViewModel>>(products));
+        var products = this.mediator.Send(CommandType.Read, EntityType.Product, 0) as IEnumerable<Product>;
+        return View(mapper.Map<IEnumerable<ProductViewModel>>(products));
     }
 
     [Route("{controller}/{id}")]
@@ -35,12 +36,14 @@ public class ProductController : Controller
             entityId = MongoDB.Bson.ObjectId.Empty;
         }
 
-        if (!_service.TryGetById(entityId, out Product? product))
+        var product = this.mediator.Send(CommandType.Read, EntityType.Product, entityId) as Product;
+
+        if (product is null)
         {
             return View(null);
         }
 
-        return View(_mapper.Map<ProductViewModel>(product));
+        return View(mapper.Map<ProductViewModel>(product));
     }
 
     [HttpGet]
@@ -62,7 +65,7 @@ public class ProductController : Controller
             return View(model);
         }
 
-        var product = _mapper.Map<Product>(model);
+        var product = mapper.Map<Product>(model);
 
         if (product is null)
         {
@@ -85,12 +88,14 @@ public class ProductController : Controller
             entityId = MongoDB.Bson.ObjectId.Empty;
         }
 
-        if (!_service.TryGetById(entityId, out Product? product))
+        var product = this.mediator.Send(CommandType.Read, EntityType.Product, entityId) as Product;
+
+        if (product is null)
         {
             return View(null);
         }
 
-        return View(_mapper.Map<ProductViewModel>(product));
+        return View(mapper.Map<ProductViewModel>(product));
     }
 
     [HttpPost]
@@ -103,7 +108,12 @@ public class ProductController : Controller
             return View(model);
         }
 
-        await _service.Update(_mapper.Map<Product>(model));
+        if (!this.validator.Validate(model).IsValid)
+        {
+
+        }
+
+        this.mediator.Send(CommandType.Update, EntityType.Product, mapper.Map<Product>(model));
 
         return RedirectToAction("Index");
     }
